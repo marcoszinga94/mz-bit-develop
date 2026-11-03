@@ -6,9 +6,30 @@ import {
   emptyEquipment,
   equipmentBonuses,
   itemValue,
+  loadoutFromRun,
 } from '../src/game/equipment';
-import { applyReward, createRun, xpNeeded } from '../src/game/progression';
-import { QUESTIONS } from '../src/game/questions';
+import {
+  applyReward,
+  createRun,
+  generateRewards,
+  xpNeeded,
+} from '../src/game/progression';
+import { pow2Label } from '../src/game/format';
+import {
+  addRunRewards,
+  applyMetaToLoadout,
+  buyMetaUpgrade,
+  coinsForRun,
+  defaultMeta,
+  MAX_META_LEVEL,
+  metaBonuses,
+  metaUpgradeCost,
+} from '../src/game/meta';
+import {
+  QUESTION_COUNT,
+  QUESTIONS,
+  pickQuestion,
+} from '../src/game/questions';
 
 describe('equipamiento', () => {
   it('equipa una pieza en un slot vacío', () => {
@@ -50,10 +71,10 @@ describe('equipamiento', () => {
     equipment = applyItem(equipment, 'leather-boots').equipment;
 
     const bonus = equipmentBonuses(equipment);
-    expect(bonus.damage).toBe(5);
-    expect(bonus.maxHp).toBe(18);
-    expect(bonus.attackSpeed).toBeCloseTo(0.08);
-    expect(bonus.range).toBe(14);
+    expect(bonus.damage).toBe(16);
+    expect(bonus.maxHp).toBe(32);
+    expect(bonus.attackSpeed).toBeCloseTo(0.125);
+    expect(bonus.range).toBe(32);
   });
 });
 
@@ -76,6 +97,57 @@ describe('progresión', () => {
     expect(result.run.level).toBe(2);
     expect(result.run.xp).toBe(0);
     expect(result.run.upgrades.damage).toBe(1);
+  });
+
+  it('las estadísticas base son potencias de dos', () => {
+    const loadout = loadoutFromRun(createRun());
+    expect(loadout.maxHp).toBe(128);
+    expect(loadout.damage).toBe(8);
+    expect(loadout.attackInterval).toBe(0.5);
+    expect(loadout.range).toBe(256);
+    expect(loadout.projectileSpeed).toBe(512);
+  });
+
+  it('formatea las estadísticas como potencias de dos', () => {
+    expect(pow2Label(8)).toBe('2**3');
+    expect(pow2Label(128)).toBe('2**7');
+    expect(pow2Label(256)).toBe('2**8');
+  });
+
+  it('Multihilo se detiene al llegar a 5 proyectiles', () => {
+    const base = createRun();
+    const maxed = {
+      ...base,
+      upgrades: { ...base.upgrades, multishot: 4 },
+    };
+
+    for (let i = 0; i < 80; i++) {
+      const rewards = generateRewards(maxed);
+      expect(
+        rewards.some((reward) => reward.kind === 'upgrade' && reward.key === 'multishot'),
+      ).toBe(false);
+    }
+
+    const loadout = loadoutFromRun({
+      ...maxed,
+      upgrades: { ...maxed.upgrades, multishot: 99 },
+    });
+    expect(loadout.extraProjectiles).toBe(4);
+  });
+
+  it('las mejoras de build se reflejan en el loadout', () => {
+    const run = { ...createRun(), xp: 30 };
+    const result = applyReward(run, {
+      kind: 'upgrade',
+      key: 'crit',
+      title: 'Overclock',
+      desc: '+6%',
+      icon: '🌀',
+    });
+    expect(result.run.upgrades.crit).toBe(1);
+    const loadout = loadoutFromRun(result.run);
+    expect(loadout.critChance).toBeGreaterThan(0);
+    expect(loadout.critMultiplier).toBeGreaterThan(1.8);
   });
 
   it('aplicar una pieza de equipo la incorpora al inventario', () => {
@@ -128,9 +200,72 @@ describe('cámara del mundo', () => {
   });
 });
 
-describe('banco de preguntas', () => {
-  it('todas las preguntas tienen 4 opciones y una respuesta válida', () => {
-    expect(QUESTIONS.length).toBeGreaterThanOrEqual(20);
+describe('meta-progresión', () => {
+  it('las monedas crecen con el nivel alcanzado', () => {
+    expect(coinsForRun(5, 20)).toBeGreaterThan(coinsForRun(1, 0));
+    expect(coinsForRun(1, 0)).toBeGreaterThanOrEqual(5);
+  });
+
+  it('comprar una mejora descuenta monedas y sube el nivel', () => {
+    const meta = { ...defaultMeta(), coins: 200 };
+    const cost = metaUpgradeCost('refactor', 0);
+    const result = buyMetaUpgrade(meta, 'refactor');
+    expect(result.ok).toBe(true);
+    expect(result.meta.coins).toBe(200 - cost);
+    expect(result.meta.upgrades.refactor).toBe(1);
+  });
+
+  it('no permite comprar sin monedas ni pasar del máximo', () => {
+    const poor = buyMetaUpgrade(defaultMeta(), 'docs');
+    expect(poor.ok).toBe(false);
+
+    let maxed = { ...defaultMeta(), coins: 999999 };
+    for (let i = 0; i < MAX_META_LEVEL + 2; i++) {
+      maxed = buyMetaUpgrade(maxed, 'linter').meta;
+    }
+    expect(maxed.upgrades.linter).toBe(MAX_META_LEVEL);
+    expect(buyMetaUpgrade(maxed, 'linter').ok).toBe(false);
+  });
+
+  it('las mejoras permanentes se aplican al loadout', () => {
+    const meta = {
+      ...defaultMeta(),
+      upgrades: { refactor: 2, coffee: 2, docs: 3, linter: 1, firewall: 2 },
+    };
+    const base = {
+      maxHp: 100,
+      damage: 10,
+      attackInterval: 1,
+      range: 280,
+      projectileSpeed: 560,
+      damageReduction: 0,
+      critChance: 0,
+      critMultiplier: 1.8,
+      extraProjectiles: 0,
+      pierce: 0,
+      lifesteal: 0,
+      xpGain: 1,
+    };
+    const boosted = applyMetaToLoadout(base, meta);
+    const bonus = metaBonuses(meta);
+    expect(boosted.maxHp).toBe(100 + bonus.maxHp);
+    expect(boosted.damage).toBeGreaterThan(base.damage);
+    expect(boosted.attackInterval).toBeLessThan(base.attackInterval);
+    expect(boosted.range).toBeGreaterThan(base.range);
+    expect(boosted.damageReduction).toBeCloseTo(bonus.damageReduction);
+  });
+
+  it('al terminar una partida sube el récord y el contador de runs', () => {
+    const meta = addRunRewards(defaultMeta(), 42, 7);
+    expect(meta.coins).toBe(42);
+    expect(meta.bestLevel).toBe(7);
+    expect(meta.runs).toBe(1);
+  });
+});
+
+describe('banco de preguntas', () => {  it('todas las preguntas tienen 4 opciones y una respuesta válida', () => {
+    expect(QUESTIONS.length).toBeGreaterThanOrEqual(40);
+    expect(QUESTION_COUNT).toBe(QUESTIONS.length);
     for (const question of QUESTIONS) {
       expect(question.options).toHaveLength(4);
       expect(question.answer).toBeGreaterThanOrEqual(0);
@@ -142,5 +277,22 @@ describe('banco de preguntas', () => {
   it('no hay ids repetidos', () => {
     const ids = new Set(QUESTIONS.map((question) => question.id));
     expect(ids.size).toBe(QUESTIONS.length);
+  });
+
+  it('baraja las opciones sin romper la respuesta correcta', () => {
+    for (let i = 0; i < 60; i++) {
+      const picked = pickQuestion([]);
+      const original = QUESTIONS.find((question) => question.id === picked.id)!;
+      expect(picked.options).toHaveLength(4);
+      expect(new Set(picked.options).size).toBe(4);
+      expect(picked.options[picked.answer]).toBe(original.options[original.answer]);
+    }
+  });
+
+  it('respeta el ciclo sin repetir hasta agotar el banco', () => {
+    const used = QUESTIONS.slice(0, QUESTION_COUNT - 1).map((question) => question.id);
+    const last = QUESTIONS[QUESTION_COUNT - 1]!;
+    const picked = pickQuestion(used);
+    expect(picked.id).toBe(last.id);
   });
 });

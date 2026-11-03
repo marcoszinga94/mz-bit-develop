@@ -2,7 +2,16 @@ export type Phase = 'start' | 'playing' | 'question' | 'reward' | 'dead';
 
 export type Slot = 'weapon' | 'armor' | 'ring' | 'boots';
 
-export type UpgradeKey = 'damage' | 'attackSpeed' | 'vitality' | 'range';
+export type UpgradeKey =
+  | 'damage'
+  | 'attackSpeed'
+  | 'vitality'
+  | 'range'
+  | 'crit'
+  | 'multishot'
+  | 'pierce'
+  | 'lifesteal'
+  | 'xpGain';
 
 export type ItemStat = 'damage' | 'maxHp' | 'attackSpeed' | 'range';
 
@@ -28,6 +37,11 @@ export interface Upgrades {
   attackSpeed: number;
   vitality: number;
   range: number;
+  crit: number;
+  multishot: number;
+  pierce: number;
+  lifesteal: number;
+  xpGain: number;
 }
 
 export interface Loadout {
@@ -36,6 +50,13 @@ export interface Loadout {
   attackInterval: number;
   range: number;
   projectileSpeed: number;
+  damageReduction: number;
+  critChance: number;
+  critMultiplier: number;
+  extraProjectiles: number;
+  pierce: number;
+  lifesteal: number;
+  xpGain: number;
 }
 
 export interface RunState {
@@ -51,6 +72,11 @@ export interface Snapshot {
   kills: number;
   time: number;
   enemyCount: number;
+  combo: number;
+  comboMult: number;
+  wave: number;
+  waveTimer: number;
+  waveDuration: number;
 }
 
 export interface Question {

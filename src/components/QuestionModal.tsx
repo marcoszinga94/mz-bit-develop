@@ -51,13 +51,14 @@ export default function QuestionModal({
     >
       <div className="animate-pop panel max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-mint/25 p-5 shadow-2xl sm:p-7">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="badge">⚡ Sube de nivel</span>
-          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-            Nv. {level} → {level + 1}
+          <span className="badge">⚡ Compilación</span>
+          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+            BUILD {level} → {level + 1}
           </span>
         </div>
 
         <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+          <span className="font-mono text-mint/70">~$</span>
           <span className="rounded-md bg-white/5 px-2 py-0.5">{question.topic}</span>
           <span
             className="flex gap-0.5"
@@ -146,14 +147,14 @@ export default function QuestionModal({
               }`}
             >
               {feedback === 'correct'
-                ? '¡Correcto! Nivel superado.'
-                : 'Incorrecto.'}
+                ? 'BUILD OK · nivel desbloqueado.'
+                : 'ERROR DE COMPILACIÓN.'}
             </p>
             {feedback === 'wrong' && (
               <p className="mt-1 text-xs leading-relaxed text-slate-300">
                 La respuesta correcta era{' '}
                 <b className="text-emerald-300">{question.options[question.answer]}</b>.
-                Pierdes el nivel pendiente y el 50% del XP.
+                Pierdes el nivel pendiente y el 50% de la compilación.
               </p>
             )}
             <p className="mt-2 text-xs leading-relaxed text-slate-400">
@@ -162,7 +163,7 @@ export default function QuestionModal({
           </div>
         ) : (
           <p className="mt-3 text-center text-[11px] text-slate-500">
-            Elige una respuesta · teclas 1-{question.options.length}
+            Selecciona una opción · teclas 1-{question.options.length}
           </p>
         )}
 
@@ -173,7 +174,7 @@ export default function QuestionModal({
               onClick={onContinue}
               className={feedback === 'correct' ? 'btn-primary' : 'btn-ghost'}
             >
-              {feedback === 'correct' ? 'Elegir recompensa →' : 'Continuar'}
+              {feedback === 'correct' ? 'Aplicar parche →' : 'Continuar'}
             </button>
           </div>
         )}

@@ -8,7 +8,7 @@
   --color-mint: #4de2c5;
   --color-gold: #f5c451;
   --color-danger: #ff5d73;
-  --font-display: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  --font-display: "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -208,7 +208,18 @@
   .animate-fade-up,
   .animate-pop,
   .animate-float,
-  .animate-toast {
+  .animate-toast,
+  .cursor-blink {
     animation: none;
   }
+}
+
+
+@keyframes cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: cursor-blink 1.1s steps(1) infinite;
 }

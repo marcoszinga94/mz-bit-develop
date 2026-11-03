@@ -13,7 +13,7 @@ function rewardDetail(reward: Reward): string {
   const def = ITEM_BY_ID[reward.defId];
   if (!def) return reward.desc;
   const value = itemValue({ defId: reward.defId, tier: reward.tier });
-  if (def.stat === 'attackSpeed') return `+${Math.round(value * 100)}% velocidad de ataque`;
+  if (def.stat === 'attackSpeed') return `+${Math.round(value * 1000) / 10}% velocidad de ataque`;
   if (def.stat === 'maxHp') return `+${value} vida máxima`;
   if (def.stat === 'range') return `+${value} alcance`;
   return `+${value} daño`;
@@ -42,21 +42,21 @@ export default function RewardModal({ rewards, level, onPick }: RewardModalProps
       <div className="animate-pop panel max-h-[92dvh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-gold/25 p-5 shadow-2xl sm:p-7">
         <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
           <span className="badge border-gold/35 bg-gold/10 text-gold">
-            🏆 Nivel {level} superado
+            🏆 BUILD {level} OK
           </span>
           <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-            Elige 1 de 3
+            Selecciona 1 parche
           </span>
         </div>
         <h2
           id="reward-title"
           className="mt-3 text-xl font-black tracking-tight text-slate-50 sm:text-2xl"
         >
-          Tu recompensa
+          Deploy de sistema
         </h2>
         <p className="mt-1 text-xs text-slate-400">
-          Las mejoras son permanentes. Las piezas iguales se fusionan solas al
-          recogerlas.
+          Aplica un parche al sistema. Las piezas iguales de hardware se
+          fusionan solas al recogerlas.
         </p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -80,7 +80,7 @@ export default function RewardModal({ rewards, level, onPick }: RewardModalProps
                       : 'bg-mint/15 text-mint'
                   }`}
                 >
-                  {isItem ? 'Equipo' : 'Mejora'}
+                  {isItem ? 'Hardware' : 'Software'}
                 </span>
 
                 <span className="mb-2 text-3xl" aria-hidden="true">
@@ -90,15 +90,17 @@ export default function RewardModal({ rewards, level, onPick }: RewardModalProps
                   {reward.title}
                 </span>
                 <span className="mt-1.5 text-xs leading-relaxed text-slate-400">
-                  {reward.desc}
+                  {isItem ? reward.desc : rewardDetail(reward)}
                 </span>
 
-                <span className="mt-3 border-t border-white/5 pt-2 text-[11px] font-semibold text-slate-300">
-                  {rewardDetail(reward)}
-                </span>
+                {isItem && (
+                  <span className="mt-3 border-t border-white/5 pt-2 text-[11px] font-semibold text-slate-300">
+                    {rewardDetail(reward)}
+                  </span>
+                )}
 
                 <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500 transition group-hover:text-slate-200">
-                  Elegir <span aria-hidden="true">→</span>
+                  Instalar <span aria-hidden="true">→</span>
                 </span>
 
                 <span className="absolute right-3 top-3 font-mono text-[10px] text-slate-600">
@@ -110,7 +112,7 @@ export default function RewardModal({ rewards, level, onPick }: RewardModalProps
         </div>
 
         <p className="mt-4 text-center text-[11px] text-slate-500">
-          También puedes pulsar 1, 2 o 3
+          Atajos de teclado: 1, 2 o 3
         </p>
       </div>
     </div>

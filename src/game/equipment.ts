@@ -1,13 +1,20 @@
 import type { Equipment, Item, ItemDef, Loadout, RunState, Slot } from './types';
 
 export const MAX_TIER = 4;
-export const TIER_MULT = 1.6;
+export const TIER_MULT = 2;
 
 export const SLOT_LABEL: Record<Slot, string> = {
-  weapon: 'Arma',
-  armor: 'Armadura',
-  ring: 'Anillo',
-  boots: 'Botas',
+  weapon: 'Periférico',
+  armor: 'Chasis',
+  ring: 'Módulo I/O',
+  boots: 'Acelerador',
+};
+
+export const SLOT_SHORT_LABEL: Record<Slot, string> = {
+  weapon: 'Perif.',
+  armor: 'Chasis',
+  ring: 'Módulo',
+  boots: 'Acel.',
 };
 
 export const SLOT_ORDER: Slot[] = ['weapon', 'armor', 'ring', 'boots'];
@@ -15,93 +22,93 @@ export const SLOT_ORDER: Slot[] = ['weapon', 'armor', 'ring', 'boots'];
 export const ITEM_DEFS: ItemDef[] = [
   {
     id: 'rusty-sword',
-    name: 'Espada oxidada',
+    name: 'Teclado',
     slot: 'weapon',
-    icon: '🗡️',
+    icon: '⌨️',
     stat: 'damage',
-    base: 3,
-    flavor: 'Corta, pero corta.',
+    base: 4,
+    flavor: 'Teclas gastadas, bugs temblorosos.',
   },
   {
     id: 'apprentice-staff',
-    name: 'Bastón de aprendiz',
+    name: 'Script',
     slot: 'weapon',
-    icon: '🪄',
+    icon: '📜',
     stat: 'damage',
-    base: 4,
-    flavor: 'Huele a magia reciclada.',
+    base: 8,
+    flavor: 'Ejecuta más rápido de lo que lees.',
   },
   {
     id: 'iron-axe',
-    name: 'Hacha de hierro',
+    name: 'Compilador',
     slot: 'weapon',
-    icon: '🪓',
+    icon: '⚙️',
     stat: 'damage',
-    base: 5,
-    flavor: 'Pesada, honesta y afilada.',
+    base: 16,
+    flavor: 'Convierte intenciones en binarios.',
   },
   {
     id: 'leather-vest',
-    name: 'Chaleco de cuero',
-    slot: 'armor',
-    icon: '🥋',
-    stat: 'maxHp',
-    base: 18,
-    flavor: 'Aprobado por el gremio de aventureros.',
-  },
-  {
-    id: 'chain-mail',
-    name: 'Cota de malla',
-    slot: 'armor',
-    icon: '🛡️',
-    stat: 'maxHp',
-    base: 28,
-    flavor: 'Muchos anillos, cero bodas.',
-  },
-  {
-    id: 'arcane-robe',
-    name: 'Túnica arcana',
+    name: 'Hoodie',
     slot: 'armor',
     icon: '🧥',
     stat: 'maxHp',
-    base: 22,
+    base: 32,
+    flavor: 'Aprobado por el comité de code review.',
+  },
+  {
+    id: 'chain-mail',
+    name: 'Tests',
+    slot: 'armor',
+    icon: '🧪',
+    stat: 'maxHp',
+    base: 64,
+    flavor: 'Cobertura del 100 %, bugs al 0 %.',
+  },
+  {
+    id: 'arcane-robe',
+    name: 'Sudadera',
+    slot: 'armor',
+    icon: '🔮',
+    stat: 'maxHp',
+    base: 64,
     flavor: 'Ligera, cómoda y con bolsillos infinitos.',
   },
   {
     id: 'copper-ring',
-    name: 'Anillo de cobre',
+    name: 'USB cobre',
     slot: 'ring',
-    icon: '💍',
+    icon: '🔌',
     stat: 'attackSpeed',
-    base: 0.08,
-    flavor: 'Brilla poco. Acelera mucho.',
+    base: 0.125,
+    flavor: 'Conecta y acelera. Sin drivers.',
   },
   {
     id: 'ruby-ring',
-    name: 'Anillo de rubí',
+    name: 'USB rubí',
     slot: 'ring',
     icon: '💎',
     stat: 'attackSpeed',
-    base: 0.12,
-    flavor: 'El rojo va más rápido.',
+    base: 0.25,
+    flavor: 'El rojo compila más rápido.',
   },
   {
     id: 'leather-boots',
-    name: 'Botas de cuero',
+    name: 'Zapatillas',
     slot: 'boots',
-    icon: '🥾',
+    icon: '👟',
     stat: 'range',
-    base: 14,
+    base: 32,
     flavor: 'Para mantener distancia de los bugs.',
   },
   {
     id: 'swift-boots',
-    name: 'Botas veloces',
+    name: 'Deploy',
     slot: 'boots',
-    icon: '👟',
+    icon: '🚀',
     stat: 'range',
-    base: 22,
-    flavor: 'Alcance extendido, sin sudor.',
+    base: 64,
+    flavor: 'Alcance extendido, cero downtime.',
   },
 ];
 
@@ -148,12 +155,19 @@ export function loadoutFromRun(run: RunState): Loadout {
   const gear = equipmentBonuses(run.equipment);
   const u = run.upgrades;
   return {
-    maxHp: Math.round(100 + u.vitality * 20 + gear.maxHp),
-    damage: Math.round((10 + gear.damage) * (1 + u.damage * 0.15) * 10) / 10,
+    maxHp: Math.round(128 + u.vitality * 32 + gear.maxHp),
+    damage: Math.round((8 + gear.damage) * (1 + u.damage * 0.25) * 10) / 10,
     attackInterval:
-      Math.round((0.8 / ((1 + u.attackSpeed * 0.12) * (1 + gear.attackSpeed))) * 1000) / 1000,
-    range: Math.round((280 + gear.range) * (1 + u.range * 0.1)),
-    projectileSpeed: 560,
+      Math.round((0.5 / ((1 + u.attackSpeed * 0.25) * (1 + gear.attackSpeed))) * 1000) / 1000,
+    range: Math.round((256 + gear.range) * (1 + u.range * 0.125)),
+    projectileSpeed: 512,
+    damageReduction: 0,
+    critChance: Math.min(0.5, u.crit * 0.0625),
+    critMultiplier: 2,
+    extraProjectiles: Math.min(4, u.multishot),
+    pierce: Math.min(3, u.pierce),
+    lifesteal: Math.min(0.25, u.lifesteal * 0.03125),
+    xpGain: 1 + u.xpGain * 0.125,
   };
 }
 

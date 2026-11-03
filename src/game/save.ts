@@ -1,8 +1,13 @@
 import { ITEM_BY_ID, MAX_TIER } from './equipment';
 import type { Equipment, SaveData, Slot, Upgrades } from './types';
 
-const SAVE_KEY = 'bit-knight-save-v1';
-const MUTE_KEY = 'bit-knight-muted';
+const SAVE_KEY = 'bit-develop-save-v1';
+const MUTE_KEY = 'bit-develop-muted';
+const MUSIC_KEY = 'bit-develop-music';
+// Claves antiguas: se migran al cargar para no perder partidas.
+const LEGACY_SAVE_KEY = 'bit-knight-save-v1';
+const LEGACY_MUTE_KEY = 'bit-knight-muted';
+const LEGACY_MUSIC_KEY = 'bit-knight-music';
 
 const SLOTS: Slot[] = ['weapon', 'armor', 'ring', 'boots'];
 
@@ -29,11 +34,33 @@ export function saveRun(
 function sanitizeUpgrades(value: unknown): Upgrades | null {
   if (!value || typeof value !== 'object') return null;
   const raw = value as Record<string, unknown>;
-  const keys: (keyof Upgrades)[] = ['damage', 'attackSpeed', 'vitality', 'range'];
-  const result: Upgrades = { damage: 0, attackSpeed: 0, vitality: 0, range: 0 };
+  const keys: (keyof Upgrades)[] = [
+    'damage',
+    'attackSpeed',
+    'vitality',
+    'range',
+    'crit',
+    'multishot',
+    'pierce',
+    'lifesteal',
+    'xpGain',
+  ];
+  const result: Upgrades = {
+    damage: 0,
+    attackSpeed: 0,
+    vitality: 0,
+    range: 0,
+    crit: 0,
+    multishot: 0,
+    pierce: 0,
+    lifesteal: 0,
+    xpGain: 0,
+  };
 
   for (const key of keys) {
     const amount = raw[key];
+    // Las partidas antiguas no tienen las mejoras nuevas: se asumen a 0.
+    if (amount === undefined) continue;
     if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
       return null;
     }
@@ -71,7 +98,11 @@ function sanitizeEquipment(value: unknown): Equipment | null {
 export function loadGame(): SaveData | null {
   if (!storageAvailable()) return null;
   try {
-    const raw = window.localStorage.getItem(SAVE_KEY);
+    let raw = window.localStorage.getItem(SAVE_KEY);
+    if (!raw) {
+      raw = window.localStorage.getItem(LEGACY_SAVE_KEY);
+      if (raw) window.localStorage.setItem(SAVE_KEY, raw);
+    }
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<SaveData>;
 
@@ -125,6 +156,7 @@ export function clearSave(): void {
   if (!storageAvailable()) return;
   try {
     window.localStorage.removeItem(SAVE_KEY);
+    window.localStorage.removeItem(LEGACY_SAVE_KEY);
   } catch {
     // ignorado
   }
@@ -134,6 +166,7 @@ export function saveMuted(muted: boolean): void {
   if (!storageAvailable()) return;
   try {
     window.localStorage.setItem(MUTE_KEY, muted ? '1' : '0');
+    window.localStorage.removeItem(LEGACY_MUTE_KEY);
   } catch {
     // ignorado
   }
@@ -142,8 +175,33 @@ export function saveMuted(muted: boolean): void {
 export function loadMuted(): boolean {
   if (!storageAvailable()) return false;
   try {
-    return window.localStorage.getItem(MUTE_KEY) === '1';
+    const value =
+      window.localStorage.getItem(MUTE_KEY) ??
+      window.localStorage.getItem(LEGACY_MUTE_KEY);
+    return value === '1';
   } catch {
     return false;
+  }
+}
+
+export function saveMusicEnabled(enabled: boolean): void {
+  if (!storageAvailable()) return;
+  try {
+    window.localStorage.setItem(MUSIC_KEY, enabled ? '1' : '0');
+    window.localStorage.removeItem(LEGACY_MUSIC_KEY);
+  } catch {
+    // ignorado
+  }
+}
+
+export function loadMusicEnabled(): boolean {
+  if (!storageAvailable()) return true;
+  try {
+    const value =
+      window.localStorage.getItem(MUSIC_KEY) ??
+      window.localStorage.getItem(LEGACY_MUSIC_KEY);
+    return value !== '0';
+  } catch {
+    return true;
   }
 }

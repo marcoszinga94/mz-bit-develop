@@ -8,8 +8,6 @@ import {
 } from './equipment';
 import type { Item, Reward, RunState, UpgradeKey, Upgrades } from './types';
 
-export const KILL_XP = 15;
-
 export function xpNeeded(level: number): number {
   return 20 + level * 10;
 }
@@ -18,7 +16,17 @@ export function createRun(): RunState {
   return {
     level: 1,
     xp: 0,
-    upgrades: { damage: 0, attackSpeed: 0, vitality: 0, range: 0 },
+    upgrades: {
+      damage: 0,
+      attackSpeed: 0,
+      vitality: 0,
+      range: 0,
+      crit: 0,
+      multishot: 0,
+      pierce: 0,
+      lifesteal: 0,
+      xpGain: 0,
+    },
     equipment: emptyEquipment(),
   };
 }
@@ -30,26 +38,71 @@ export const UPGRADE_META: Record<
   damage: {
     title: 'Filo afilado',
     icon: '⚔️',
-    desc: '+15% de daño base',
+    desc: '+25% de daño base',
   },
   attackSpeed: {
     title: 'Ritmo de combate',
     icon: '⚡',
-    desc: '+12% de velocidad de ataque',
+    desc: '+25% de velocidad de ataque',
   },
   vitality: {
     title: 'Corazón de hierro',
     icon: '❤️',
-    desc: '+20 de vida máxima y cura',
+    desc: '+32 de vida máxima y cura',
   },
   range: {
     title: 'Ojo de halcón',
     icon: '🎯',
-    desc: '+10% de alcance de ataque',
+    desc: '+12.5% de alcance de ataque',
+  },
+  crit: {
+    title: 'Overclock',
+    icon: '🌀',
+    desc: '+6.25% de probabilidad de crítico (x2)',
+  },
+  multishot: {
+    title: 'Multihilo',
+    icon: '🧵',
+    desc: '+1 proyectil por ataque (75% de daño, máx. 5)',
+  },
+  pierce: {
+    title: 'Paquete perforante',
+    icon: '📡',
+    desc: 'Los proyectiles atraviesan 1 enemigo más',
+  },
+  lifesteal: {
+    title: 'Auto-reparación',
+    icon: '♻️',
+    desc: '+3.125% del daño infligido se convierte en vida',
+  },
+  xpGain: {
+    title: 'Compilación -O2',
+    icon: '📈',
+    desc: '+12.5% de compilación (XP) por kill',
   },
 };
 
-const UPGRADE_KEYS: UpgradeKey[] = ['damage', 'attackSpeed', 'vitality', 'range'];
+const UPGRADE_KEYS: UpgradeKey[] = [
+  'damage',
+  'attackSpeed',
+  'vitality',
+  'range',
+  'crit',
+  'multishot',
+  'pierce',
+  'lifesteal',
+  'xpGain',
+];
+
+/** Mejoras con un límite de stacks. Multihilo llega a 5 proyectiles en total. */
+const UPGRADE_MAX: Partial<Record<UpgradeKey, number>> = {
+  multishot: 4,
+};
+
+function isUpgradeAvailable(run: RunState, key: UpgradeKey): boolean {
+  const max = UPGRADE_MAX[key];
+  return max === undefined || run.upgrades[key] < max;
+}
 
 function shuffle<T>(items: T[]): T[] {
   const copy = [...items];
@@ -123,8 +176,12 @@ export function generateRewards(run: RunState): Reward[] {
   const rewards: Reward[] = [];
   const usedDefs = new Set<string>();
 
-  const upgradeKey = UPGRADE_KEYS[Math.floor(Math.random() * UPGRADE_KEYS.length)]!;
-  rewards.push(upgradeReward(upgradeKey));
+  const availableKeys = UPGRADE_KEYS.filter((key) => isUpgradeAvailable(run, key));
+  if (availableKeys.length > 0) {
+    const upgradeKey =
+      availableKeys[Math.floor(Math.random() * availableKeys.length)]!;
+    rewards.push(upgradeReward(upgradeKey));
+  }
 
   const firstDef = pickEquipmentDef(run, usedDefs);
   if (firstDef) {
@@ -141,7 +198,7 @@ export function generateRewards(run: RunState): Reward[] {
   }
 
   while (rewards.length < 3) {
-    const remaining = UPGRADE_KEYS.filter(
+    const remaining = availableKeys.filter(
       (key) => !rewards.some((r) => r.kind === 'upgrade' && r.key === key),
     );
     const key = remaining[Math.floor(Math.random() * remaining.length)];
@@ -153,6 +210,8 @@ export function generateRewards(run: RunState): Reward[] {
 }
 
 export function applyUpgrade(run: RunState, key: UpgradeKey): RunState {
+  const max = UPGRADE_MAX[key];
+  if (max !== undefined && run.upgrades[key] >= max) return run;
   const upgrades: Upgrades = { ...run.upgrades, [key]: run.upgrades[key] + 1 };
   return { ...run, upgrades };
 }

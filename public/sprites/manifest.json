@@ -1,0 +1,94 @@
+{
+  "hero": {
+    "image": "/sprites/hero.png",
+    "frameWidth": 146,
+    "frameHeight": 180,
+    "anchorX": 0.5,
+    "anchorY": 1.0,
+    "maxWidth": 84,
+    "maxHeight": 94,
+    "animations": {
+      "idle": {
+        "row": 0,
+        "frames": 8,
+        "fps": 9,
+        "loop": true
+      },
+      "attack": {
+        "row": 1,
+        "frames": 6,
+        "fps": 12,
+        "loop": false
+      }
+    }
+  },
+  "bug": {
+    "image": "/sprites/bug.png",
+    "frameWidth": 234,
+    "frameHeight": 204,
+    "anchorX": 0.5,
+    "anchorY": 1.0,
+    "maxWidth": 62,
+    "maxHeight": 52,
+    "animations": {
+      "idle": {
+        "row": 0,
+        "frames": 8,
+        "fps": 10,
+        "loop": true
+      },
+      "attack": {
+        "row": 1,
+        "frames": 6,
+        "fps": 12,
+        "loop": false
+      }
+    }
+  },
+  "virus": {
+    "image": "/sprites/virus.png",
+    "frameWidth": 184,
+    "frameHeight": 205,
+    "anchorX": 0.5,
+    "anchorY": 1.0,
+    "maxWidth": 78,
+    "maxHeight": 70,
+    "animations": {
+      "idle": {
+        "row": 0,
+        "frames": 8,
+        "fps": 12,
+        "loop": true
+      },
+      "attack": {
+        "row": 1,
+        "frames": 6,
+        "fps": 14,
+        "loop": false
+      }
+    }
+  },
+  "trojan": {
+    "image": "/sprites/trojan.png",
+    "frameWidth": 117,
+    "frameHeight": 181,
+    "anchorX": 0.5,
+    "anchorY": 1.0,
+    "maxWidth": 112,
+    "maxHeight": 126,
+    "animations": {
+      "idle": {
+        "row": 0,
+        "frames": 8,
+        "fps": 6,
+        "loop": true
+      },
+      "attack": {
+        "row": 1,
+        "frames": 6,
+        "fps": 9,
+        "loop": false
+      }
+    }
+  }
+}

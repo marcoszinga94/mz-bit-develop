@@ -1,5 +1,5 @@
 {
-  "name": "bit-knight",
+  "name": "bit-develop",
   "type": "module",
   "version": "0.1.0",
   "private": true,
@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sprites": "blender --background --python tools/blender/make_sprites.py && python3 tools/blender/pack_sprites.py"
   },
   "dependencies": {
     "@astrojs/react": "^7.1.2",
