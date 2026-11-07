@@ -39,12 +39,13 @@ npm run typecheck # TypeScript sin emitir
   enemigo más cercano dentro de su rango con su espada compiladora.
 - Cada kill da XP. Al llenar la barra se pausa el combate y aparece una pregunta
   de programación con 4 opciones.
-- **Acierto:** subes de nivel y eliges 1 de 3 recompensas (mejora de estadística
-  o pieza de equipo).
+- **Acierto:** subes de nivel y eliges **1 de 3 mejoras de software** de un
+  pool de 13 mejoras posibles.
 - **Fallo:** pierdes el nivel pendiente y el 50 % del XP. Se muestra la respuesta
   correcta con explicación y el combate continúa.
-- **Equipo:** 4 slots (arma, armadura, anillo, botas). Dos piezas iguales se
-  fusionan automáticamente y suben de tier (máximo ★4).
+- **Equipo:** 4 slots (arma, armadura, anillo, botas). Cada 2 niveles se instala
+  una pieza de hardware automáticamente; dos piezas iguales se fusionan y suben
+  de tier (máximo ★4).
 - **Oleadas:** cada **45 segundos** sube la oleada. Los enemigos ganan vida,
   daño y velocidad, y aparecen más rápido. El HUD muestra la oleada actual y el
   tiempo hasta la siguiente; al subir aparece un aviso en pantalla.
@@ -106,9 +107,11 @@ tools/
   tienen 1.8× vida, dan 2.5× XP y llevan un anillo dorado.
 - **Combo:** las kills encadenadas multiplican la XP hasta ×1.75 y se muestran
   en el HUD.
-- Mejoras de build: **Overclock** (crítico), **Multihilo** (+proyectil),
-  **Paquete perforante** (atraviesa enemigos), **Auto-reparación** (robo de
-  vida) y **Compilación -O2** (+XP).
+- Mejoras de build (pool de 13): **Overclock** (crítico), **Golpe cuántico**
+  (daño crítico), **Multihilo** (+proyectil), **Paquete perforante**,
+  **Auto-reparación**, **Compilación -O2**, **Parche en caliente** (regen),
+  **Firewall local** (reducción de daño) y **Fibra óptica** (velocidad de
+  proyectil), además de las cuatro estadísticas base.
 - Escalado por oleada: vida ×1.35 y daño ×1.18 por oleada; la frecuencia de
   aparición baja un 6 % y la velocidad sube hasta un 45 %. Máximo 40 enemigos
   en pantalla.

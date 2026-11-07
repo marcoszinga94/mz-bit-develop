@@ -1,11 +1,4 @@
-import {
-  ITEM_BY_ID,
-  ITEM_DEFS,
-  MAX_TIER,
-  SLOT_LABEL,
-  applyItem,
-  emptyEquipment,
-} from './equipment';
+import { ITEM_DEFS, MAX_TIER, applyItem, emptyEquipment } from './equipment';
 import type { Item, Reward, RunState, UpgradeKey, Upgrades } from './types';
 
 export function xpNeeded(level: number): number {
@@ -26,6 +19,10 @@ export function createRun(): RunState {
       pierce: 0,
       lifesteal: 0,
       xpGain: 0,
+      critDamage: 0,
+      regen: 0,
+      armor: 0,
+      projectileSpeed: 0,
     },
     equipment: emptyEquipment(),
   };
@@ -80,6 +77,26 @@ export const UPGRADE_META: Record<
     icon: '📈',
     desc: '+12.5% de compilación (XP) por kill',
   },
+  critDamage: {
+    title: 'Golpe cuántico',
+    icon: '💥',
+    desc: '+0.25× al multiplicador de crítico',
+  },
+  regen: {
+    title: 'Parche en caliente',
+    icon: '🩹',
+    desc: '+0.5 de vida por segundo',
+  },
+  armor: {
+    title: 'Firewall local',
+    icon: '🧱',
+    desc: '+3% de reducción de daño',
+  },
+  projectileSpeed: {
+    title: 'Fibra óptica',
+    icon: '🛰️',
+    desc: '+15% de velocidad de proyectil',
+  },
 };
 
 const UPGRADE_KEYS: UpgradeKey[] = [
@@ -92,6 +109,10 @@ const UPGRADE_KEYS: UpgradeKey[] = [
   'pierce',
   'lifesteal',
   'xpGain',
+  'critDamage',
+  'regen',
+  'armor',
+  'projectileSpeed',
 ];
 
 /** Mejoras con un límite de stacks. Multihilo llega a 5 proyectiles en total. */
@@ -124,32 +145,6 @@ function upgradeReward(key: UpgradeKey): Reward {
   };
 }
 
-function itemReward(run: RunState, defId: string): Reward {
-  const def = ITEM_BY_ID[defId]!;
-  const current = run.equipment[def.slot];
-  let desc = `Equipa en ${SLOT_LABEL[def.slot].toLowerCase()}`;
-
-  if (current && current.defId === defId) {
-    const nextTier = Math.min(MAX_TIER, current.tier + 1);
-    desc =
-      current.tier >= MAX_TIER
-        ? `Ya tienes ${def.name} al tier máximo`
-        : `¡Fusiona! ${def.name} ★${current.tier} → ★${nextTier}`;
-  } else if (current) {
-    const oldDef = ITEM_BY_ID[current.defId];
-    desc = `Reemplaza ${oldDef?.name ?? 'tu pieza'} ★${current.tier}`;
-  }
-
-  return {
-    kind: 'item',
-    defId,
-    title: def.name,
-    desc,
-    icon: def.icon,
-    tier: 1,
-  };
-}
-
 function pickEquipmentDef(run: RunState, excluded: Set<string>): string | null {
   const owned: Item[] = Object.values(run.equipment).filter(
     (item): item is Item => item !== null && item.tier < MAX_TIER,
@@ -171,42 +166,23 @@ function pickEquipmentDef(run: RunState, excluded: Set<string>): string | null {
   return candidates[Math.floor(Math.random() * candidates.length)]!.id;
 }
 
-/** Genera 3 recompensas distintas: al menos una pieza de equipo y una mejora. */
+/** Genera 3 mejoras de software distintas, elegidas del pool completo disponible. */
 export function generateRewards(run: RunState): Reward[] {
-  const rewards: Reward[] = [];
-  const usedDefs = new Set<string>();
-
   const availableKeys = UPGRADE_KEYS.filter((key) => isUpgradeAvailable(run, key));
-  if (availableKeys.length > 0) {
-    const upgradeKey =
-      availableKeys[Math.floor(Math.random() * availableKeys.length)]!;
-    rewards.push(upgradeReward(upgradeKey));
-  }
+  return shuffle(availableKeys).slice(0, 3).map(upgradeReward);
+}
 
-  const firstDef = pickEquipmentDef(run, usedDefs);
-  if (firstDef) {
-    usedDefs.add(firstDef);
-    rewards.push(itemReward(run, firstDef));
-  }
-
-  if (Math.random() < 0.5) {
-    const secondDef = pickEquipmentDef(run, usedDefs);
-    if (secondDef) {
-      usedDefs.add(secondDef);
-      rewards.push(itemReward(run, secondDef));
-    }
-  }
-
-  while (rewards.length < 3) {
-    const remaining = availableKeys.filter(
-      (key) => !rewards.some((r) => r.kind === 'upgrade' && r.key === key),
-    );
-    const key = remaining[Math.floor(Math.random() * remaining.length)];
-    if (!key) break;
-    rewards.push(upgradeReward(key));
-  }
-
-  return shuffle(rewards).slice(0, 3);
+/** Drop automático de hardware (cada 2 niveles) para mantener la fusión de equipo. */
+export function randomHardwareDrop(
+  run: RunState,
+): { run: RunState; message: string } | null {
+  const defId = pickEquipmentDef(run, new Set());
+  if (!defId) return null;
+  const result = applyItem(run.equipment, defId, 1);
+  return {
+    run: { ...run, equipment: result.equipment },
+    message: result.message,
+  };
 }
 
 export function applyUpgrade(run: RunState, key: UpgradeKey): RunState {

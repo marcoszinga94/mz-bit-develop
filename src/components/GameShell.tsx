@@ -18,7 +18,13 @@ import {
   type MetaState,
   type MetaUpgradeKey,
 } from '../game/meta';
-import { applyReward, createRun, generateRewards, xpNeeded } from '../game/progression';
+import {
+  applyReward,
+  createRun,
+  generateRewards,
+  randomHardwareDrop,
+  xpNeeded,
+} from '../game/progression';
 import { QUESTION_COUNT, pickQuestion } from '../game/questions';
 import { spriteBank } from '../game/sprites';
 import {
@@ -233,7 +239,20 @@ export default function GameShell() {
   const handlePickReward = useCallback(
     (reward: Reward) => {
       const result = applyReward(runRef.current, reward);
-      const next = result.run;
+      let next = result.run;
+      let message = result.message;
+      let hardwareDropped = false;
+
+      // Drop automático de hardware cada 2 niveles.
+      if (next.level % 2 === 0) {
+        const drop = randomHardwareDrop(next);
+        if (drop) {
+          next = drop.run;
+          message = `${message} · ${drop.message}`;
+          hardwareDropped = true;
+        }
+      }
+
       runRef.current = next;
       setRun(next);
 
@@ -255,9 +274,9 @@ export default function GameShell() {
       changePhase('playing');
       engineRef.current?.resume();
 
-      setToast({ id: Date.now(), message: result.message });
-      if (reward.kind === 'item') sfx.merge();
-      else sfx.empower();
+      setToast({ id: Date.now(), message });
+      if (reward.kind === 'item' || hardwareDropped) sfx.merge();
+      if (reward.kind === 'upgrade') sfx.empower();
       persist();
     },
     [changePhase, persist],

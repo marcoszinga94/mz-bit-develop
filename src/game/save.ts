@@ -44,6 +44,10 @@ function sanitizeUpgrades(value: unknown): Upgrades | null {
     'pierce',
     'lifesteal',
     'xpGain',
+    'critDamage',
+    'regen',
+    'armor',
+    'projectileSpeed',
   ];
   const result: Upgrades = {
     damage: 0,
@@ -55,6 +59,10 @@ function sanitizeUpgrades(value: unknown): Upgrades | null {
     pierce: 0,
     lifesteal: 0,
     xpGain: 0,
+    critDamage: 0,
+    regen: 0,
+    armor: 0,
+    projectileSpeed: 0,
   };
 
   for (const key of keys) {

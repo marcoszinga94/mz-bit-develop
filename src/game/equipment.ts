@@ -160,14 +160,15 @@ export function loadoutFromRun(run: RunState): Loadout {
     attackInterval:
       Math.round((0.5 / ((1 + u.attackSpeed * 0.25) * (1 + gear.attackSpeed))) * 1000) / 1000,
     range: Math.round((256 + gear.range) * (1 + u.range * 0.125)),
-    projectileSpeed: 512,
-    damageReduction: 0,
+    projectileSpeed: Math.round(512 * (1 + u.projectileSpeed * 0.15)),
+    damageReduction: Math.min(0.6, u.armor * 0.03),
     critChance: Math.min(0.5, u.crit * 0.0625),
-    critMultiplier: 2,
+    critMultiplier: 2 + u.crit * 0.05 + u.critDamage * 0.25,
     extraProjectiles: Math.min(4, u.multishot),
     pierce: Math.min(3, u.pierce),
     lifesteal: Math.min(0.25, u.lifesteal * 0.03125),
     xpGain: 1 + u.xpGain * 0.125,
+    regen: u.regen * 0.5,
   };
 }
 

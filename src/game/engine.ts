@@ -280,6 +280,7 @@ export class GameEngine {
     pierce: 0,
     lifesteal: 0,
     xpGain: 1,
+    regen: 0,
   };
 
   private level = 1;
@@ -663,7 +664,10 @@ export class GameEngine {
     }
 
     if (this.hero.hp > 0 && this.hero.hp < this.hero.maxHp) {
-      this.hero.hp = Math.min(this.hero.maxHp, this.hero.hp + 0.45 * dt);
+      this.hero.hp = Math.min(
+        this.hero.maxHp,
+        this.hero.hp + (0.45 + this.loadout.regen) * dt,
+      );
     }
 
     // Latido cuando la vida está crítica.

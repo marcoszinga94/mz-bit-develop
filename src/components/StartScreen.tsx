@@ -22,7 +22,7 @@ const FEATURES = [
   {
     icon: '🧠',
     title: 'Sube de nivel',
-    text: 'Cada nivel es una pregunta de programación. Acierta para elegir recompensa.',
+    text: 'Cada nivel es una pregunta de programación. Acierta para elegir 1 de 3 mejoras.',
   },
   {
     icon: '🪙',

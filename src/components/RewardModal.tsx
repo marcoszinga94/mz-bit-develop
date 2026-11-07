@@ -45,7 +45,7 @@ export default function RewardModal({ rewards, level, onPick }: RewardModalProps
             🏆 BUILD {level} OK
           </span>
           <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-            Selecciona 1 parche
+            Selecciona 1 de {rewards.length} mejoras
           </span>
         </div>
         <h2
@@ -55,8 +55,8 @@ export default function RewardModal({ rewards, level, onPick }: RewardModalProps
           Deploy de sistema
         </h2>
         <p className="mt-1 text-xs text-slate-400">
-          Aplica un parche al sistema. Las piezas iguales de hardware se
-          fusionan solas al recogerlas.
+          Elige una mejora de software. Cada 2 niveles se instala una pieza de
+          hardware automáticamente y las piezas iguales se fusionan solas.
         </p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -112,7 +112,7 @@ export default function RewardModal({ rewards, level, onPick }: RewardModalProps
         </div>
 
         <p className="mt-4 text-center text-[11px] text-slate-500">
-          Atajos de teclado: 1, 2 o 3
+          Atajos de teclado: 1-{rewards.length}
         </p>
       </div>
     </div>

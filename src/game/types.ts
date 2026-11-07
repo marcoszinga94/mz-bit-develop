@@ -11,7 +11,11 @@ export type UpgradeKey =
   | 'multishot'
   | 'pierce'
   | 'lifesteal'
-  | 'xpGain';
+  | 'xpGain'
+  | 'critDamage'
+  | 'regen'
+  | 'armor'
+  | 'projectileSpeed';
 
 export type ItemStat = 'damage' | 'maxHp' | 'attackSpeed' | 'range';
 
@@ -42,6 +46,10 @@ export interface Upgrades {
   pierce: number;
   lifesteal: number;
   xpGain: number;
+  critDamage: number;
+  regen: number;
+  armor: number;
+  projectileSpeed: number;
 }
 
 export interface Loadout {
@@ -57,6 +65,7 @@ export interface Loadout {
   pierce: number;
   lifesteal: number;
   xpGain: number;
+  regen: number;
 }
 
 export interface RunState {

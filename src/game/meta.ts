@@ -202,7 +202,10 @@ export function applyMetaToLoadout(loadout: Loadout, meta: MetaState): Loadout {
       Math.round((loadout.attackInterval / (1 + bonus.attackSpeedPct)) * 1000) /
       1000,
     range: Math.round(loadout.range + bonus.range),
-    damageReduction: bonus.damageReduction,
+    damageReduction: Math.min(
+      0.6,
+      loadout.damageReduction + bonus.damageReduction,
+    ),
   };
 }
 

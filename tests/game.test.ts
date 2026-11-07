@@ -12,6 +12,7 @@ import {
   applyReward,
   createRun,
   generateRewards,
+  randomHardwareDrop,
   xpNeeded,
 } from '../src/game/progression';
 import { pow2Label } from '../src/game/format';
@@ -112,6 +113,25 @@ describe('progresión', () => {
     expect(pow2Label(8)).toBe('2**3');
     expect(pow2Label(128)).toBe('2**7');
     expect(pow2Label(256)).toBe('2**8');
+  });
+
+  it('ofrece siempre 3 mejoras de software distintas', () => {
+    for (let i = 0; i < 30; i++) {
+      const rewards = generateRewards(createRun());
+      expect(rewards).toHaveLength(3);
+      expect(rewards.every((reward) => reward.kind === 'upgrade')).toBe(true);
+      const keys = new Set(
+        rewards.map((reward) => (reward.kind === 'upgrade' ? reward.key : '')),
+      );
+      expect(keys.size).toBe(3);
+    }
+  });
+
+  it('instala hardware automáticamente en el drop de nivel', () => {
+    const drop = randomHardwareDrop(createRun());
+    expect(drop).not.toBeNull();
+    const equipped = Object.values(drop!.run.equipment).filter(Boolean);
+    expect(equipped).toHaveLength(1);
   });
 
   it('Multihilo se detiene al llegar a 5 proyectiles', () => {
@@ -245,6 +265,7 @@ describe('meta-progresión', () => {
       pierce: 0,
       lifesteal: 0,
       xpGain: 1,
+      regen: 0,
     };
     const boosted = applyMetaToLoadout(base, meta);
     const bonus = metaBonuses(meta);
