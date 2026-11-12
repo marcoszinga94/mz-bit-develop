@@ -1,166 +1,99 @@
-# 💻 Bit Develop
+# Bit Develop
 
-Action RPG idle en 2D donde un desarrollador lucha solo contra bugs, virus y
-troyanos. Tú subes de nivel respondiendo preguntas de programación básica:
-acierta para elegir una mejora o una pieza de equipamiento; consigue dos piezas
-iguales y se fusionarán en una mejor.
+> Action RPG idle en 2D donde un desarrollador combate bugs, virus y troyanos mientras responde preguntas de programación.
 
-Al caer ganas **monedas** según el nivel alcanzado y los enemigos derrotados.
-Esas monedas se invierten fuera de la partida en **mejoras pasivas permanentes**
-que se aplican a todas las runs siguientes.
+![Astro](https://img.shields.io/badge/Astro-FF5D01?logo=astro&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)
+
+## Características
+
+- **Bucle de juego:** el héroe permanece en el centro de la arena y ataca automáticamente al enemigo más cercano dentro de su rango. Los enemigos son bugs, virus, troyanos y variantes elite.
+- **Oleadas:** cada 45 segundos sube la oleada; aumentan vida, daño y velocidad enemigos, y la frecuencia de aparición. El HUD muestra oleada y tiempo restante.
+- **Progresión por conocimiento:** al llenar la barra de XP el combate se pausa y aparece una pregunta de programación con 4 opciones.
+- **Acierto:** sube de nivel y elige 1 de 3 mejoras de software. **Fallo:** la XP queda en el 50 % de lo necesario para el siguiente nivel y se muestra la respuesta correcta con explicación.
+- **13 mejoras** con stacks: daño, cadencia, vitalidad, alcance, crítico, multihilo, perforación, lifesteal, XP, daño crítico, regeneración, armadura y velocidad de proyectil.
+- **Equipamiento:** 4 slots (periférico, chasis, módulo I/O y acelerador). Cada 2 niveles cae una pieza automáticamente; dos piezas iguales se fusionan y suben de tier hasta ★4.
+- **Meta-progresión:** al morir se ganan monedas según nivel y kills. La tienda permanente ofrece Refactor, Cafeína, Documentación, Linter y Firewall, con 5 niveles cada una.
+- **Persistencia:** partida, récord, monedas y preferencias de sonido en `localStorage`; se puede continuar tras recargar.
+- **Audio procedural:** efectos y música chiptune sintetizados con WebAudio, con silencio total o solo de música.
+- **Sprites:** hojas PNG generadas en Blender y cargadas desde `public/sprites`; si fallan, el juego usa arte procedural.
+- **Tests:** Vitest cubre equipamiento, progresión, cámara del mundo, meta-progresión y validación del banco de 42 preguntas.
 
 ## Stack
 
-- [Astro 7](https://astro.build) con isla de React 19 (`client:only`)
-- Tailwind CSS 4
-- Canvas 2D para el combate (sprites 2D renderizados en Blender + VFX procedurales)
-- WebAudio para efectos y música chiptune sintetizados en tiempo real
-- Vitest para la lógica de progresión y equipamiento
+| Capa | Tecnología |
+| --- | --- |
+| Framework | Astro 7 con isla de React 19 (`client:only`) |
+| Render | Canvas 2D para combate y VFX |
+| Estilos | Tailwind CSS 4 |
+| Audio | WebAudio sin assets externos |
+| Herramientas | Blender y Python con Pillow para sprites |
+| Tests | Vitest |
 
-## Arrancar
+## Estructura del proyecto
+
+```text
+src/
+  pages/index.astro     entrada y montaje del juego
+  components/           HUD, modales, tienda, pantallas
+  game/
+    engine.ts           combate, oleadas y render
+    progression.ts      XP, niveles y recompensas
+    equipment.ts        slots, tiers y fusión
+    meta.ts             monedas y mejoras permanentes
+    questions.ts        banco de preguntas
+    audio.ts            SFX y música
+    save.ts             persistencia local
+  styles/global.css     Tailwind y tema
+public/sprites/         sprites y manifiesto
+tests/                  suite de Vitest
+tools/blender/          generación de sprites
+```
+
+## Puesta en marcha
+
+### Requisitos
+
+- Node.js 22 o superior y npm.
+- Blender 4.2 o superior y Pillow solo para regenerar sprites.
+
+### Instalación
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abre la URL que indique Astro (por defecto `http://localhost:4321`).
+Astro sirve el juego en `http://localhost:4321` por defecto.
 
-```bash
-npm run build     # build estático en dist/
-npm run preview   # sirve el build
-npm test          # tests de lógica
-npm run typecheck # TypeScript sin emitir
-```
+## Scripts
 
-## Cómo se juega
+| Comando | Descripción |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build estático en `dist/` |
+| `npm run preview` | Sirve el build generado |
+| `npm run test` | Ejecuta la suite de Vitest |
+| `npm run typecheck` | Chequeo de TypeScript sin emitir |
+| `npm run sprites` | Regenera y empaqueta los sprites con Blender |
 
-- El desarrollador está fijo en el centro de la arena y ataca automáticamente al
-  enemigo más cercano dentro de su rango con su espada compiladora.
-- Cada kill da XP. Al llenar la barra se pausa el combate y aparece una pregunta
-  de programación con 4 opciones.
-- **Acierto:** subes de nivel y eliges **1 de 3 mejoras de software** de un
-  pool de 13 mejoras posibles.
-- **Fallo:** pierdes el nivel pendiente y el 50 % del XP. Se muestra la respuesta
-  correcta con explicación y el combate continúa.
-- **Equipo:** 4 slots (arma, armadura, anillo, botas). Cada 2 niveles se instala
-  una pieza de hardware automáticamente; dos piezas iguales se fusionan y suben
-  de tier (máximo ★4).
-- **Oleadas:** cada **45 segundos** sube la oleada. Los enemigos ganan vida,
-  daño y velocidad, y aparecen más rápido. El HUD muestra la oleada actual y el
-  tiempo hasta la siguiente; al subir aparece un aviso en pantalla.
-- **Muerte:** la partida termina y se reinicia el progreso de la run, pero ganas
-  monedas según el nivel alcanzado y los kills. El récord y las mejoras
-  permanentes se conservan.
-- **Meta-progresión:** desde la pantalla de inicio o la de derrota puedes abrir
-  la tienda de mejoras permanentes (Refactor, Cafeína, Documentación, Linter y
-  Firewall), con 5 niveles cada una.
-- La partida se guarda en `localStorage` y se puede continuar al recargar.
+## Despliegue
 
-Teclas: `1-4` para responder, `Enter`/`Espacio` para continuar, `1-3` para elegir
-recompensa.
+El build es estático y no usa adapter: el contenido de `dist/` se puede publicar en
+cualquier hosting de sitios estáticos.
 
-Sonido: el HUD y la pantalla de inicio permiten silenciar todo (`🔊`) o solo la
-música (`🎵`). Las preferencias se guardan en `localStorage`.
+## Estado del proyecto
 
-## Estructura
+Juego jugable con combate, progresión, equipamiento, meta-progresión y guardado local.
+El balance y la variedad de contenido siguen en desarrollo.
 
-```
-src/
-├── pages/index.astro          # entrada, monta el juego
-├── styles/global.css          # Tailwind + tema visual
-├── components/
-│   ├── GameShell.tsx          # estados, XP, guardado, callbacks
-│   ├── HUD.tsx                # vida, XP, nivel, kills, tiempo
-│   ├── QuestionModal.tsx      # pregunta y feedback
-│   ├── RewardModal.tsx        # elección de recompensa
-│   ├── EquipmentPanel.tsx     # slots y stats derivadas
-│   ├── MetaShop.tsx           # tienda de mejoras permanentes
-│   ├── GameOver.tsx           # resumen + monedas ganadas
-│   └── StartScreen.tsx
-└── game/
-    ├── engine.ts              # bucle, enemigos, combate, partículas
-    ├── sprites.ts             # carga y dibujo de hojas de sprites
-    ├── progression.ts         # XP, niveles, recompensas
-    ├── meta.ts                # monedas, costes y pasivas permanentes
-    ├── equipment.ts           # items, tiers, fusión, loadout
-    ├── questions.ts           # banco de 42 preguntas simples
-    ├── save.ts                # localStorage validado
-    ├── audio.ts               # SFX y música procedural con WebAudio
-    └── types.ts
-public/
-└── sprites/                   # hojas PNG y manifiesto generados con Blender
-tools/
-└── blender/                   # scripts de modelado, render y empaquetado
-```
+## Licencia
 
-## Balance del prototipo
+Sin licencia definida.
 
-- Vida base **128** (`2**7`), daño **8** (`2**3`), ataque cada **0,5 s**
-  (`2**1/s`) y rango **256** (`2**8`) px. Las estadísticas se muestran como
-  potencias de dos; las mejoras usan fracciones binarias (25 %, 12,5 %, 6,25 %,
-  3,125 %) y cada tier de equipo duplica su bono.
-- XP por kill: 15. XP para subir: `20 + 10 × nivel`.
-- Enemigos: **bug** (rápido y frágil), **virus** (flotante y veloz) y
-  **troyano** (lento y tanque); escalan con el nivel.
-- XP por kill: bug 14, virus 20, troyano 36. Los **élites** (desde nivel 4)
-  tienen 1.8× vida, dan 2.5× XP y llevan un anillo dorado.
-- **Combo:** las kills encadenadas multiplican la XP hasta ×1.75 y se muestran
-  en el HUD.
-- Mejoras de build (pool de 13): **Overclock** (crítico), **Golpe cuántico**
-  (daño crítico), **Multihilo** (+proyectil), **Paquete perforante**,
-  **Auto-reparación**, **Compilación -O2**, **Parche en caliente** (regen),
-  **Firewall local** (reducción de daño) y **Fibra óptica** (velocidad de
-  proyectil), además de las cuatro estadísticas base.
-- Escalado por oleada: vida ×1.35 y daño ×1.18 por oleada; la frecuencia de
-  aparición baja un 6 % y la velocidad sube hasta un 45 %. Máximo 40 enemigos
-  en pantalla.
-- Monedas al morir: `8 + 5 × nivel + kills / 4` (mínimo 5).
-- Mejoras permanentes: 5 categorías × 5 niveles. El coste escala con el nivel
-  (`coste base × (nivel + 1)`).
-- 42 preguntas en español de nivel inicial (variables, tipos, operadores,
-  condicionales, bucles, funciones, arrays, objetos y binario), sin repetir
-  hasta agotar el banco. El orden de las preguntas y de sus opciones es aleatorio.
+## Autor
 
-## Notas técnicas
-
-- Los personajes son **sprites 2D pre-renderizados en Blender**: un avatar de
-  ejecución, un glitch de wireframe, un daemon orbital y un payload monolito.
-  Son entidades digitales abstractas, no representaciones literales. El modelado, las animaciones idle/ataque y el render
-  ortogonal viven en `tools/blender/make_sprites.py`; `pack_sprites.py` recorta,
-  empaqueta y genera `public/sprites/manifest.json`. Se regeneran con
-  `npm run sprites`.
-- El motor carga las hojas de forma asíncrona y mantiene el arte procedural como
-  fallback: si los sprites no están disponibles, el juego sigue funcionando.
-- La arena es una **placa base**: rejilla PCB, pistas de circuito con pulsos de
-  datos, chips con etiquetas (CPU, RAM, GPU, NET…), zócalo de procesador bajo el
-  héroe, racks de servidores con LEDs y scanlines de monitor.
-- Las estadísticas principales se muestran como potencias de dos (`2**3`,
-  `2**7`, `2**8`…) mediante `pow2Label`; los valores reales siguen siendo números
-  para la simulación y aparecen en el tooltip.
-- La interfaz usa estética de terminal: `INTEGRIDAD`, `COMPILACIÓN`, `HARDWARE`,
-  `BUILD`, `UPTIME`, `AUTO-EXEC`, prompts `root@bitdevelop:~$` y cursor
-  parpadeante. Los enemigos sueltan `+DATA` y al subir de nivel aparece
-  `COMPILED`.
-- Las claves antiguas de `localStorage` (`bit-knight-*`) se migran
-  automáticamente a las nuevas (`bit-develop-*`) para no perder partidas.
-- La espada del avatar, las sombras, los portales de aparición, las partículas,
-  los anillos de impacto, el combo y las barras de vida siguen dibujándose por código;
-  así la espada apunta siempre al enemigo y los efectos se adaptan al combate.
-- El audio es 100 % procedural con WebAudio: los SFX (disparo, impacto, muerte,
-  subida de nivel, acierto/fallo, etc.) son osciladores y ruido filtrado; la
-  música es un secuenciador chiptune con bajo, arpegio, pad, melodía y batería
-  que gana intensidad con el nivel del jugador.
-- El canvas usa un **mundo lógico fijo** definido al arrancar y una cámara con
-  escala uniforme. Al cambiar el zoom del navegador o el tamaño de la ventana,
-  el mundo se escala y centra; el desarrollador y los enemigos conservan su posición
-  relativa en lugar de saltar.
-- El combate, los proyectiles y las partículas viven en coordenadas del mundo;
-  el HUD, los modales y el equipo son DOM (React + Tailwind).
-
-## Próximos pasos posibles
-
-- Más zonas, jefes y enemigos temáticos (gusanos, ransomware, bugs de producción).
-- Sets de equipo con bonus y rarezas.
-- Más preguntas y categorías configurables.
-- Ranking local y estadísticas por partida.
+Marcos Zingaretti — https://github.com/marcoszinga94
